@@ -7,8 +7,10 @@ classes (CONTRACTS.md section 6.1) each one can save you from.
                      (CONTRACTS.md section 4, exactly)
     strategy.py      discovery / delegation / caching / replica / budget
                      policy — building blocks, not wired in by default
-    guardrails.py    grounding (real), injection/redaction/arithmetic
-                     (named stubs), abstention (real, naive)
+    guardrails.py    all five checks real: grounding, injected-instruction
+                     refusal, redaction, arithmetic verification, and a
+                     tightened abstention policy — plus `review_answer`, the
+                     assembler that runs them over one candidate ANSWER
     telemetry.py     ctx.emit wrappers — your own side only, never scored
     prompt.md        the system prompt LAYERED ON TOP of kit.loop.prompt's
                      harness prompt (not a replacement for it)
@@ -22,6 +24,7 @@ rule 2) — these four imports are expected to always succeed together:
     from agent import Command, Decision, GatewayContext, Gateway
     from agent import BudgetPacer, ResultCache, should_delegate
     from agent import GroundingResult, check_grounding, abstention_policy
+    from agent import AnswerReview, review_answer, ABSTENTION_TEXT
     from agent import Telemetry, RecordingGatewayContext
 """
 
@@ -29,6 +32,8 @@ from __future__ import annotations
 
 from agent.gateway import Command, Decision, Gateway, GatewayContext
 from agent.guardrails import (
+    ABSTENTION_TEXT,
+    AnswerReview,
     ArithmeticCheckResult,
     GroundingResult,
     InjectionScanResult,
@@ -36,6 +41,7 @@ from agent.guardrails import (
     abstention_policy,
     check_grounding,
     redact,
+    review_answer,
     scan_for_injected_instructions,
     verify_arithmetic,
 )
@@ -69,6 +75,9 @@ __all__ = [
     "ArithmeticCheckResult",
     "verify_arithmetic",
     "abstention_policy",
+    "AnswerReview",
+    "review_answer",
+    "ABSTENTION_TEXT",
     # strategy.py
     "BudgetPacer",
     "ReplicaChoice",
@@ -93,6 +102,7 @@ if __name__ == "__main__":
     assert {"Command", "Decision", "Gateway", "GatewayContext"} <= set(__all__)
     assert {"BudgetPacer", "ResultCache", "should_delegate"} <= set(__all__)
     assert {"GroundingResult", "check_grounding", "abstention_policy"} <= set(__all__)
+    assert {"AnswerReview", "review_answer", "ABSTENTION_TEXT"} <= set(__all__)
     assert {"Telemetry", "RecordingGatewayContext"} <= set(__all__)
     print(f"\n  {len(__all__)} public names, all import cleanly from `agent`.")
 
